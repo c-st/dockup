@@ -6,10 +6,9 @@ RUN apk add --update-cache python py-pip ca-certificates tzdata &&\
     rm -fR /etc/periodic &&\
     rm -rf /var/cache/apk/*
 
-ADD backup.sh /backup.sh
-ADD restore.sh /restore.sh
-ADD run.sh /run.sh
-RUN chmod 755 /*.sh
+ADD backup.sh /etc/scripts/backup.sh
+ADD restore.sh /etc/scripts/restore.sh
+RUN chmod 755 /etc/scripts/*.sh
 
 COPY entrypoint.sh /sbin/entrypoint.sh
 RUN chmod +x /sbin/entrypoint.sh
