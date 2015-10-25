@@ -41,11 +41,19 @@ docker run \
 ```
 
 `dockup` will use your AWS credentials to create a new bucket with the same
-name as defined in the environment variable `S3_BUCKET_NAME`. 
-Every night at 2:30 the content of `PATHS_TO_BACKUP` will be tarballed, gzipped and uploaded to the S3 bucket.
+name as defined in the environment variable `S3_BUCKET_NAME`.
+Every night at 2:30 the content of `PATHS_TO_BACKUP` will be tarballed,
+gzipped and uploaded to the S3 bucket.
 
 The backup archive created in above example would be:
 `s3://docker-backups/myservice.2015-10-25T02:30:00Z.tar.gz`
+
+To perform an unscheduled backup you can also run the following command attached
+to the running container:
+
+```
+docker exec -ti myservice-backup /etc/scripts/backup.sh
+```
 
 ## Restore
 
@@ -62,4 +70,10 @@ docker run \
 	-e BACKUP_NAME=myservice \
 	-e RESTORE=true \
     chrisst/dockup
+```
+
+To perform a restore you can also attach to a running dockup container:
+
+```
+docker exec -ti myservice-backup /etc/scripts/restore.sh
 ```
