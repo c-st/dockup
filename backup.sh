@@ -6,7 +6,7 @@ set -e
 readonly tarball=$BACKUP_NAME$BACKUP_SUFFIX.tar.gz
 
 # Create a gzip compressed tarball with the volume(s)
-tar czf $tarball $BACKUP_TAR_OPTION $PATHS_TO_BACKUP
+tar pczf $tarball $BACKUP_TAR_OPTION $PATHS_TO_BACKUP
 
 # Create bucket, if it doesn't already exist
 BUCKET_EXISTS=$(aws s3 ls | grep $S3_BUCKET_NAME | wc -l)

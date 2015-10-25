@@ -10,6 +10,6 @@ aws s3 cp s3://$S3_BUCKET_NAME/$LAST_BACKUP $LAST_BACKUP
 
 # Extract backup
 echo "Starting extraction"
-tar xzf $LAST_BACKUP $RESTORE_TAR_OPTION
+tar pxzf $LAST_BACKUP $RESTORE_TAR_OPTION
 
 echo "Done"
