@@ -2,7 +2,7 @@
 set -e
 
 # Get timestamp
-: ${BACKUP_SUFFIX:=.$(date +"%Y-%m-%d-%H-%M-%S")}
+: ${BACKUP_SUFFIX:=.$(date --utc +"%FT%T%Z")}
 readonly tarball=$BACKUP_NAME$BACKUP_SUFFIX.tar.gz
 
 # Create a gzip compressed tarball with the volume(s)
