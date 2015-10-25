@@ -33,9 +33,9 @@ docker run \
 	-e AWS_ACCESS_KEY_ID=<your_key_here> \
 	-e AWS_SECRET_ACCESS_KEY=<your_secret_here> \
 	-e AWS_DEFAULT_REGION=eu-central-1 \
+	-e S3_BUCKET_NAME=docker-backups \
 	-e BACKUP_NAME=myservice \
 	-e PATHS_TO_BACKUP=/etc/myservice /var/lib/myservice \
-	-e S3_BUCKET_NAME=docker-backups \
 	-e BACKUP_CRON_SCHEDULE=30 2 * * * \
     chrisst/dockup
 ```
@@ -58,8 +58,8 @@ docker run \
 	-e AWS_ACCESS_KEY_ID=<your_key_here> \
 	-e AWS_SECRET_ACCESS_KEY=<your_secret_here> \
 	-e AWS_DEFAULT_REGION=eu-central-1 \
-	-e BACKUP_NAME=myservice \
 	-e S3_BUCKET_NAME=docker-backups \
+	-e BACKUP_NAME=myservice \
 	-e RESTORE=true \
     chrisst/dockup
 ```
