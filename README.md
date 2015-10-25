@@ -1,74 +1,65 @@
-
 # Dockup
 
-[![Deploy to Tutum](https://s.tutum.co/deploy-to-tutum.svg)](https://dashboard.tutum.co/stack/deploy/)
+Docker image to backup Docker container volumes to Amazon S3 in regular intervals (cron based). Also includes the possibility to restore from a backup.
 
-Docker image to backup your Docker container volumes
+In order to use a minimal amount of space it is based on [Alpine Linux](http://www.alpinelinux.org).
 
-Why the name? Docker + Backup = Dockup
+Inspired by [tutumcloud/dockup](https://github.com/tutumcloud/dockup) and
+[outcoldman/docker-backup](https://github.com/outcoldman/docker-backup).
 
-# Usage
+## Usage
 
 You have a container running with one or more volumes:
 
 ```
-$ docker run -d --name mysql tutum/mysql
+docker run -d --name myservice myservice
 ```
 
-From executing a `$ docker inspect mysql` we see that this container has two volumes:
+From executing `docker inspect myservice` we see that this container has two volumes:
 
 ```
 "Volumes": {
-            "/etc/mysql": {},
-            "/var/lib/mysql": {}
-        }
+  "/etc/myservice": {},
+  "/var/lib/myservice": {}
+}
 ```
 
 Launch `dockup` container with the following flags:
 
 ```
-$ docker run --rm \
---env-file env.txt \
---volumes-from mysql \
---name dockup borja/dockup
+docker run \
+	--volumes-from myservice \
+	--name myservice-backup
+	-e AWS_ACCESS_KEY_ID=<your_key_here> \
+	-e AWS_SECRET_ACCESS_KEY=<your_secret_here> \
+	-e AWS_DEFAULT_REGION=eu-central-1 \
+	-e BACKUP_NAME=myservice \
+	-e PATHS_TO_BACKUP=/etc/myservice /var/lib/myservice \
+	-e S3_BUCKET_NAME=docker-backups \
+	-e BACKUP_CRON_SCHEDULE=30 2 * * * \
+    chrisst/dockup
 ```
 
-The contents of `env.txt` being:
+`dockup` will use your AWS credentials to create a new bucket with the same
+name as defined in the environment variable `S3_BUCKET_NAME`. 
+Every night at 2:30 the content of `PATHS_TO_BACKUP` will be tarballed, gzipped and uploaded to the S3 bucket.
+
+The backup archive created in above example would be:
+`s3://docker-backups/myservice.2015-10-25T02:30:00Z.tar.gz`
+
+## Restore
+
+To perform a restore launch the container with the `RESTORE` variable set to true:
 
 ```
-AWS_ACCESS_KEY_ID=<key_here>
-AWS_SECRET_ACCESS_KEY=<secret_here>
-AWS_DEFAULT_REGION=us-east-1
-BACKUP_NAME=mysql
-PATHS_TO_BACKUP=/etc/mysql /var/lib/mysql
-S3_BUCKET_NAME=docker-backups.example.com
+docker run \
+	--volumes-from myservice \
+	--name myservice-backup
+	-e AWS_ACCESS_KEY_ID=<your_key_here> \
+	-e AWS_SECRET_ACCESS_KEY=<your_secret_here> \
+	-e AWS_DEFAULT_REGION=eu-central-1 \
+	-e BACKUP_NAME=myservice \
+	-e S3_BUCKET_NAME=docker-backups \
+	-e RESTORE=true \
+    chrisst/dockup
 ```
-
-`dockup` will use your AWS credentials to create a new bucket with name as per the environment variable `S3_BUCKET_NAME`, or if not defined, using the default name `docker-backups.example.com`. The paths in `PATHS_TO_BACKUP` will be tarballed, gzipped, time-stamped and uploaded to the S3 bucket.
-
-
-> [Bucket naming guidelines](http://docs.aws.amazon.com/cli/latest/userguide/using-s3-commands.html):
-> "Bucket names must be unique and should be DNS compliant. Bucket names can contain lowercase letters, numbers, hyphens and periods. Bucket names can only start and end with a letter or number, and cannot contain a period next to a hyphen or another period."
-
-These rules are enforced in some regions.
-
-
-[AWS S3 Regions](http://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region)
-
-| Region name               | Region         |
-| ------------------------- | -------------- |
-| US Standard               | us-east-1      |
-| US West (Oregon)          | us-west-2      |
-| US West (N. California)   | us-west-1      |
-| EU (Ireland)              | eu-west-1      |
-| EU (Frankfurt)            | eu-central-1   |
-| Asia Pacific (Singapore)  | ap-southeast-1 |
-| Asia Pacific (Sydney)     | ap-southeast-2 |
-| Asia Pacific (Tokyo)      | ap-northeast-1 |
-| South America (Sao Paulo) | sa-east-1      |
-
-
-To perform a restore launch the container with the RESTORE variable set to true
-
-
-![](http://s.tutum.co.s3.amazonaws.com/support/images/dockup-readme.png)
